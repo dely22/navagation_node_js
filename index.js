@@ -1,65 +1,52 @@
-const http = require('http');
-const route = require('url');
-const fs = require('fs');
-http.createServer((req, res) => {
-    try {
+const express = require('express');
+const path = require('path');
 
-        switch (req.url) {
-            case '/':
-            case '/home':
-            case '/index':
+let initial_path = path.join(__dirname, "public");
 
-                fs.readFile(__dirname + '/index.html', function (err, html) {
-                    if (err) throw err;
-                    res.writeHeader(200, { "Content-Type": "text/html" });
-                    res.write(html);
-                    res.end()
-                })
-
-                break;
-            case '/blog':
-                fs.readFile('./blog.html', function (err, html) {
-                    if (err) throw err;
-                    res.writeHeader(200, { "Content-Type": "text/html" });
-                    res.write(html);
-                    res.end()
-                })
-                break;
-            case '/admin':
-            case '/login':
-            case '/LogIn':
-                fs.readFile('./LogIn.html', function (err, html) {
-                    if (err) throw err;
-                    res.writeHeader(200, { "Content-Type": "text/html" });
-                    res.write(html);
-                    res.end()
-                })
-                // }
-                break;
-            case '/admin?role=admin':
-                fs.readFile('./Admin.html', function (err, html) {
-                    if (err) throw err;
-                    res.writeHeader(200, { "Content-Type": "text/html" });
-                    res.write(html);
-                    res.end()
-                })
-                break;
-            default:
-                fs.readFile('./404.html', function (err, html) {
-                    if (err) throw err;
-                    res.writeHeader(200, { "Content-Type": "text/html" });
-                    res.write(html);
-                    res.end()
-                })
-                break;
-        }
+const app = express();
+app.use(express.static(initial_path));
 
 
-    } catch (er) {
-        console.log(er);
-        res.statusCode = 500;
-        res.end()
-    }
 
-}).listen(5000)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(initial_path, "index.html"));
+})
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(initial_path, "index.html"));
+})
 
+app.get('/blog', (req, res) => {
+    res.sendFile(path.join(initial_path, "blog.html"));
+})
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(initial_path, "LogIn.html"));
+})
+
+
+
+
+
+app.get('/admin', (req, res) => {
+   
+    if (req.url.includes("?role")) {
+        if (req.query.role.toLocaleLowerCase() == 'admin')
+            res.sendFile(path.join(initial_path, "admin.html"));
+        else
+            res.sendFile(path.join(initial_path, "index.html"));
+    } 
+    else
+    res.sendFile(path.join(initial_path, "LogIn.html"));
+
+})
+
+app.get('*', (req, res) => {
+	res.statusCode = 404;
+  			res.end(' Sorry, page not found');
+})
+
+
+
+
+app.listen("4000", () => {
+    console.log('Server running at http://127.0.0.1:4000');
+})
